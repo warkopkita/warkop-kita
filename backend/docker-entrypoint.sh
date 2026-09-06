@@ -17,14 +17,17 @@ php artisan storage:link 2>/dev/null || true
 
 # Wait for database & run migrations if DB is set
 if [ -n "$DB_HOST" ]; then
-    echo "Running migrations..."
-    php artisan migrate --force || echo "Migration failed or database not ready yet."
+    echo "Menunggu koneksi MySQL di ${DB_HOST}..."
+    until php -r "try { new PDO('mysql:host=' . getenv('DB_HOST') . ';port=' . (getenv('DB_PORT') ?: 3306) . ';dbname=' . getenv('DB_DATABASE'), getenv('DB_USERNAME'), getenv('DB_PASSWORD')); exit(0); } catch (Exception \$e) { exit(1); }" 2>/dev/null; do
+        echo "Database belum siap, mencoba lagi dalam 2 detik..."
+        sleep 2
+    done
+    echo "Database siap! Menjalankan migrasi dan seeder otomatis..."
+    php artisan migrate --seed --force || true
 fi
 
-# Optimize cache
-php artisan config:cache || true
-php artisan route:cache || true
-php artisan view:cache || true
+# Clear & optimize cache
+php artisan optimize:clear || true
 
 echo "Starting Apache on port ${PORT:-80}..."
 exec apache2-foreground
