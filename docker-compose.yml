@@ -1,0 +1,68 @@
+services:
+  app:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: warkop_app
+    restart: unless-stopped
+    ports:
+      - "8000:80"
+    environment:
+      APP_NAME: "Warkop Kita"
+      APP_ENV: production
+      APP_KEY: base64:ckViezk4NrT8vmdfFAO8pCUutmp0mr4ydPaS7sclLPM=
+      APP_DEBUG: "false"
+      APP_URL: http://localhost:8000
+      DB_CONNECTION: mysql
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_DATABASE: warkop_dadang
+      DB_USERNAME: warkop_user
+      DB_PASSWORD: warkop_password
+      SESSION_DRIVER: file
+      CACHE_STORE: file
+      QUEUE_CONNECTION: sync
+    depends_on:
+      - mysql
+    networks:
+      - warkop-net
+
+  mysql:
+    image: mysql:8.0
+    container_name: warkop_mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: warkop_dadang
+      MYSQL_USER: warkop_user
+      MYSQL_PASSWORD: warkop_password
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - warkop-net
+
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: warkop_phpmyadmin
+    restart: unless-stopped
+    environment:
+      PMA_HOST: mysql
+      PMA_USER: root
+      PMA_PASSWORD: rootpassword
+      UPLOAD_LIMIT: 64M
+    ports:
+      - "8080:80"
+    depends_on:
+      - mysql
+    networks:
+      - warkop-net
+
+volumes:
+  mysql_data:
+    driver: local
+
+networks:
+  warkop-net:
+    driver: bridge
