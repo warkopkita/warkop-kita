@@ -1,0 +1,17 @@
+{
+  "name": "Warkop Kita Ecosystem",
+  "image": "mcr.microsoft.com/devcontainers/universal:2-linux",
+  "postStartCommand": "docker compose up -d",
+  "forwardPorts": [8000, 8080],
+  "portsAttributes": {
+    "8000": {
+      "label": "Warkop POS & Web App",
+      "onAutoForward": "openPreview",
+      "visibility": "public"
+    },
+    "8080": {
+      "label": "phpMyAdmin Database Manager",
+      "visibility": "public"
+    }
+  }
+}
